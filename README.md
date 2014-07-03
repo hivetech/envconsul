@@ -48,7 +48,7 @@ we can see it work:
 
 ```
 $ envconsul -addr="nyc1.demo.consul.io:80" prefix env
-FOO=bar
+INFO[0000] env FOO=bar
 ```
 
 We can also ask envconsul to watch for any configuration changes
@@ -57,13 +57,13 @@ and restart our process:
 ```
 $ envconsul -addr="nyc1.demo.consul.io:80" -reload \
   prefix /bin/sh -c "env; echo "-----"; sleep 1000"
-FOO=bar
------
-FOO=baz
------
-FOO=baz
-BAR=foo
------
+INFO[0000] env FOO=bar
+INFO[0000] env -----
+INFO[0000] env FOO=baz
+INFO[0000] env -----
+INFO[0000] env FOO=baz
+INFO[0000] env BAR=FOO
+INFO[0000] env -----
 ```
 
 The above output happened by setting keys and values within
