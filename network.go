@@ -47,10 +47,14 @@ func (c *ConsulNetwork) discoverAndRemember(serviceName, tag, prefix string) {
       service.Node.Address,
     )
 
-    c.injectIntoEnv(
-      fmt.Sprintf("%s/%s_PORT", prefix, strings.ToUpper(tag)),
-      strconv.Itoa(service.Service.Port),
-    )
+    if service.Service.Port != 0 {
+      c.injectIntoEnv(
+        fmt.Sprintf("%s/%s_PORT", prefix, strings.ToUpper(tag)),
+        strconv.Itoa(service.Service.Port),
+      )
+    } else {
+      Log.Warn("Service port not found, skipping.")
+    }
   }
 }
 

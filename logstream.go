@@ -6,6 +6,7 @@ package main
 import (
   "bytes"
   "io"
+  "strings"
 
   "github.com/Sirupsen/logrus"
 )
@@ -73,7 +74,8 @@ func (l *Logstream) OutputLines() (err error) {
 
 func (l *Logstream) out(str string) (err error) {
 
-  str = l.colorPrefix + l.prefix + l.colorReset + " " + str
+  // Build colorful output and remove trailing carriage return
+  str = strings.TrimSpace(l.colorPrefix + l.prefix + l.colorReset + " " + str)
   if l.output == "stdout" {
     l.Logger.Info(str)
   } else if l.output == "stderr" {
