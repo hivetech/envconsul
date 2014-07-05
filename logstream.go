@@ -73,7 +73,7 @@ func (l *Logstream) OutputLines() (err error) {
 
 func (l *Logstream) out(str string) (err error) {
 
-  str = l.colorPrefix + l.prefix + " " + str + l.colorReset
+  str = l.colorPrefix + l.prefix + l.colorReset + " " + str
   if l.output == "stdout" {
     l.Logger.Info(str)
   } else if l.output == "stderr" {

@@ -89,15 +89,15 @@ func watchAndExec(config *WatchConfig) (int, error) {
 
       Log.WithFields(logrus.Fields{
         "key":   k,
-        "value": pair.Value,
-      }).Info("Storing environment variable")
+        "value": string(pair.Value),
+      }).Info("Fetched environment variable.")
       newEnv[k] = string(pair.Value)
     }
 
     // If the environmental variables didn't actually change,
     // then don't do anything.
     if reflect.DeepEqual(env, newEnv) {
-      Log.Debug("Nothing new in KV store")
+      Log.Debug("Nothing new in KV store.")
       continue
     }
 

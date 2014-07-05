@@ -2,7 +2,6 @@ package main
 
 import (
   "flag"
-  //"fmt"
   "os"
   "path/filepath"
   "strings"
@@ -17,7 +16,7 @@ func init() {
   Log.Level = logrus.Debug
   Log.Formatter = new(logrus.TextFormatter)
   Log.WithFields(logrus.Fields{
-    "level":     "Debug",
+    "verbose":   "Debug",
     "formatter": "Text",
   }).Debug("Logger ready (obviously !)")
 }
@@ -33,6 +32,8 @@ func realMain() int {
   var consulDC string
   var sanitize bool
   var upcase bool
+  // Services available
+  var webService string
 
   flag.Usage = usage
   flag.BoolVar(
@@ -53,6 +54,10 @@ func realMain() int {
   flag.BoolVar(
     &upcase, "upcase", true,
     "make all environmental variable keys uppercase")
+  // Services available
+  flag.StringVar(
+    &webService, "web", "",
+    "Comma separated web services on the network to discover")
 
   flag.Parse()
   if flag.NArg() < 2 {
@@ -61,6 +66,16 @@ func realMain() int {
   }
 
   args := flag.Args()
+
+  var nodesNetwork = NewConsulNetwork(consulAddr, consulDC)
+  webServices := strings.Split(webService, ",")
+  for i := 0; i < len(webServices); i++ {
+    Log.WithFields(logrus.Fields{
+      "type": "web",
+      "tag":  webServices[i],
+    }).Info("Service required.")
+    nodesNetwork.discoverAndRemember("web", webServices[i], args[0])
+  }
 
   config := WatchConfig{
     ConsulAddr: consulAddr,
@@ -78,7 +93,6 @@ func realMain() int {
     "error":  err,
   }).Info("Done")
   if err != nil {
-    //fmt.Fprintf(os.Stderr, "Error: %s\n", err)
     Log.Error("Error: %s\n", err)
     return 111
   }
@@ -88,7 +102,6 @@ func realMain() int {
 
 func usage() {
   cmd := filepath.Base(os.Args[0])
-  //fmt.Fprintf(os.Stderr, strings.TrimSpace(helpText)+"\n\n", cmd)
   Log.Error(strings.TrimSpace(helpText)+"\n\n", cmd)
   flag.PrintDefaults()
 }
