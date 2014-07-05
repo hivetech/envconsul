@@ -20,7 +20,7 @@ Run `envconsul` to see the usage help:
 ```
 
 $ envconsul
-Usage: envconsul.exe [options] prefix child...
+Usage: envconsul [options] prefix child...
 
   Sets environmental variables for the child process by reading
   K/V from Consul's K/V store with the given prefix.
@@ -30,10 +30,12 @@ Options:
   -addr="127.0.0.1:8500": consul HTTP API address with port
   -dc="": consul datacenter, uses local if blank
   -errexit=false: exit if there is an error watching config keys
+  -logfile="": If provided, redirect logs to this file
   -reload=false: if set, restarts the process when config changes
   -sanitize=false: turn invalid characters in the key into underscores
   -upcase=false: make all environmental variable keys uppercase
-
+  -verbose=false: Extend log output to debug level
+  -web="": Comma separated web services on the network to discover
 ```
 
 ## Example
@@ -68,3 +70,19 @@ INFO[0000] env -----
 
 The above output happened by setting keys and values within
 the online demo UI while envconsul was running.
+
+## Service discovery
+
+You can ask envconsul to automatically inject into process environment how to
+access a remote service, known by consul.
+
+Considering an application registered in the console network under `web`
+service with tag `dashboard` :
+
+```
+$ ./envconsul --web dashboard app/env env
+...
+INFO[0000] env DASHBOARD_HOST=172.17.0.4
+INFO[0000] env DASHBOARD_PORT=80
+INFO[0000] Done
+```

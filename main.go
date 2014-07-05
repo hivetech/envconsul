@@ -11,16 +11,6 @@ import (
 
 var Log = logrus.New()
 
-func init() {
-  // Initialize logger
-  Log.Level = logrus.Debug
-  Log.Formatter = new(logrus.TextFormatter)
-  Log.WithFields(logrus.Fields{
-    "verbose":   "Debug",
-    "formatter": "Text",
-  }).Debug("Logger ready (obviously !)")
-}
-
 func main() {
   os.Exit(realMain())
 }
@@ -32,6 +22,8 @@ func realMain() int {
   var consulDC string
   var sanitize bool
   var upcase bool
+  var logfile string
+  var verbose bool
   // Services available
   var webService string
 
@@ -54,6 +46,12 @@ func realMain() int {
   flag.BoolVar(
     &upcase, "upcase", true,
     "make all environmental variable keys uppercase")
+  flag.BoolVar(
+    &verbose, "verbose", false,
+    "Extend log output to debug level")
+  flag.StringVar(
+    &logfile, "logfile", "",
+    "If provided, redirect logs to this file")
   // Services available
   flag.StringVar(
     &webService, "web", "",
@@ -66,6 +64,40 @@ func realMain() int {
   }
 
   args := flag.Args()
+
+  // Initialize logger
+  if verbose {
+    Log.Level = logrus.Debug
+  }
+  Log.Formatter = new(logrus.TextFormatter)
+
+  if logfile != "" {
+    // open output file
+    fd, err := os.Create(logfile)
+    if err != nil {
+      Log.WithFields(logrus.Fields{
+        "error": err.Error(),
+        "file":  logfile,
+      }).Error("Unable to create file.")
+    }
+    // close fo on exit and check for its returned error
+    defer func() {
+      if err := fd.Close(); err != nil {
+        Log.WithFields(logrus.Fields{
+          "error": err.Error(),
+          "file":  logfile,
+        }).Error("Unable to close file descriptor.")
+        panic(err)
+      }
+    }()
+    if err == nil {
+      Log.Out = fd
+    }
+  }
+  Log.WithFields(logrus.Fields{
+    "verbose":   verbose,
+    "formatter": "Text",
+  }).Debug("Logger ready (obviously !)")
 
   var nodesNetwork = NewConsulNetwork(consulAddr, consulDC)
   webServices := strings.Split(webService, ",")
@@ -102,7 +134,7 @@ func realMain() int {
 
 func usage() {
   cmd := filepath.Base(os.Args[0])
-  Log.Error(strings.TrimSpace(helpText)+"\n\n", cmd)
+  Log.Errorf(strings.TrimSpace(helpText)+"\n\n", cmd)
   flag.PrintDefaults()
 }
 

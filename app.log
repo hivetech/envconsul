@@ -1,0 +1,27 @@
+[34mDEBU[0m[0000] Logger ready (obviously !)                    [34mformatter[0m=Text [34mverbose[0m=true
+[34mINFO[0m[0000] Service required.                             [34mtag[0m=trading [34mtype[0m=web
+[34mDEBU[0m[0000] Inspecting report for Service 'web' check    
+[34mINFO[0m[0000] Found health report.                          [34mNotes[0m= [34mOutput[0m= [34mid[0m=service:web [34mname[0m=Service 'web' check [34mservice-id[0m=web [34mservice-name[0m=web [34mstatus[0m=critical
+[34mINFO[0m[0000] Identified service as healthy.                [34mnode[0m=&{dashboard 172.17.0.4} [34mservice[0m=&{web web [dashboard node trading] 80}
+[34mINFO[0m[0000] Successfully stored pair.                     [34melapsed[0m=79.727393ms [34mpair[0m=&{app/env/TRADING_HOST 0 0 0 0 [49 55 50 46 49 55 46 48 46 52] }
+[34mINFO[0m[0000] Successfully stored pair.                     [34melapsed[0m=65.690267ms [34mpair[0m=&{app/env/TRADING_PORT 0 0 0 0 [56 48] }
+[34mINFO[0m[0000] Connecting to consul.                         [34maddress[0m=127.0.0.1:8500 [34mdatacenter[0m=
+[34mDEBU[0m[0000] Send the initial list out right away.        
+[34mINFO[0m[0000] Fetched environment variable.                 [34mkey[0m=DASHBOARD_HOST [34mvalue[0m=172.17.0.4
+[34mINFO[0m[0000] Fetched environment variable.                 [34mkey[0m=DASHBOARD_PORT [34mvalue[0m=80
+[34mINFO[0m[0000] Fetched environment variable.                 [34mkey[0m=TRADING_HOST [34mvalue[0m=172.17.0.4
+[34mINFO[0m[0000] Fetched environment variable.                 [34mkey[0m=TRADING_PORT [34mvalue[0m=80
+[34mINFO[0m[0000] Configuration changed, reload the process.   
+[34mINFO[0m[0000] Loading variables into process env.          
+[34mINFO[0m[0000] Starting process ...                         
+[34mINFO[0m[0000] [32mps[0m   PID TTY          TIME CMD
+     
+[34mINFO[0m[0000] [32mps[0m  1564 pts/10   00:00:00 envconsul
+ 
+[34mINFO[0m[0000] [32mps[0m  1568 pts/10   00:00:00 ps
+      
+[34mINFO[0m[0000] [32mps[0m  2677 pts/10   00:00:03 zsh
+     
+[34mINFO[0m[0000] [32mps[0m  9855 pts/10   00:00:03 gocode
+  
+[34mINFO[0m[0000] Done                                          [34merror[0m=<nil> [34mresult[0m=0
