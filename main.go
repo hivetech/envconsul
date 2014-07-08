@@ -7,6 +7,8 @@ import (
   "strings"
 
   "github.com/Sirupsen/logrus"
+
+  "github.com/hivetech/envconsul/log"
 )
 
 var Log = logrus.New()
@@ -26,6 +28,8 @@ func realMain() int {
   var verbose bool
   // Services available
   var webService string
+  // Hooks available
+  var loghookArg string
 
   flag.Usage = usage
   flag.BoolVar(
@@ -56,6 +60,10 @@ func realMain() int {
   flag.StringVar(
     &webService, "web", "",
     "Comma separated web services on the network to discover")
+  // Hooks available
+  flag.StringVar(
+    &loghookArg, "loghook", "",
+    "A service where to send logs, like <service>:<info>")
 
   flag.Parse()
   if flag.NArg() < 2 {
@@ -70,6 +78,12 @@ func realMain() int {
     Log.Level = logrus.Debug
   }
   Log.Formatter = new(logrus.TextFormatter)
+  loghook := strings.Split(loghookArg, ":")
+  if loghook[0] == "pushbullet" && len(loghook) == 2 {
+    Log.Hooks.Add(log.NewPushbulletHook(args[0], os.Getenv("PUSHBULLET_API_KEY"), loghook[1]))
+  } else {
+    Log.Warn("Loghook not implemented, skipping.")
+  }
 
   if logfile != "" {
     // open output file
@@ -100,13 +114,28 @@ func realMain() int {
   }).Debug("Logger ready (obviously !)")
 
   var nodesNetwork = NewConsulNetwork(consulAddr, consulDC)
-  webServices := strings.Split(webService, ",")
-  for i := 0; i < len(webServices); i++ {
-    Log.WithFields(logrus.Fields{
-      "type": "web",
-      "tag":  webServices[i],
-    }).Info("Service required.")
-    nodesNetwork.discoverAndRemember("web", webServices[i], args[0])
+  if webService != "" {
+    webServices := strings.Split(webService, ",")
+    for i := 0; i < len(webServices); i++ {
+      Log.WithFields(logrus.Fields{
+        "type": "web",
+        "tag":  webServices[i],
+      }).Info("Service required.")
+      if err := nodesNetwork.discoverAndRemember("web", webServices[i], args[0]); err != nil {
+        Log.WithFields(logrus.Fields{
+          "service": "web",
+          "tag":     webServices[i],
+        }).Error(err.Error())
+        // TODO Different strategies (stop, retry, ...)
+        if errExit {
+          Log.WithFields(logrus.Fields{
+            "reason":  err.Error(),
+            "errExit": errExit,
+          }).Warn("Forcing exit ...")
+          os.Exit(1)
+        }
+      }
+    }
   }
 
   config := WatchConfig{

@@ -24,19 +24,13 @@ func NewConsulNetwork(consulAddr, consulDC string) *ConsulNetwork {
   }
 }
 
-func (c *ConsulNetwork) discoverAndRemember(serviceName, tag, prefix string) {
+func (c *ConsulNetwork) discoverAndRemember(serviceName, tag, prefix string) error {
   service, err := c.searchService(serviceName, tag)
   if err != nil {
-    Log.WithFields(logrus.Fields{
-      "msg":     err.Error(),
-      "service": serviceName,
-      "tag":     tag,
-    }).Error("Service not found.")
-    return
+    return err
   }
 
-  // FIXME Change "!", this is a current workaround
-  if !c.isServiceHealthy(serviceName, service.Checks) && err == nil {
+  if c.isServiceHealthy(serviceName, service.Checks) && err == nil {
     Log.WithFields(logrus.Fields{
       "node":    service.Node,
       "service": service.Service,
@@ -55,7 +49,15 @@ func (c *ConsulNetwork) discoverAndRemember(serviceName, tag, prefix string) {
     } else {
       Log.Warn("Service port not found, skipping.")
     }
+  } else {
+    if err != nil {
+      return err
+    } else {
+      return fmt.Errorf("service not healthy")
+    }
   }
+
+  return nil
 }
 
 func (c *ConsulNetwork) searchService(name, tag string) (*consulapi.ServiceEntry, error) {

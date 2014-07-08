@@ -1,1 +1,3 @@
 github.com/Sirupsen/logrus #97978e5e5483a3f926c2bb6e19f9e2ff344e81f0
+github.com/armon/consul-api #3f6088258421750d48dfdbdbf19660ad57bd38c7
+github.com/xconstruct/go-pushbullet #a5ff30b38950feb30ffc2756305df5149cbacd78

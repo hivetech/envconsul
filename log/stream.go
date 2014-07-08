@@ -1,7 +1,7 @@
 /*
  * https://github.com/kvz/logstreamer
  */
-package main
+package log
 
 import (
   "bytes"

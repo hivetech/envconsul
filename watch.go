@@ -12,6 +12,8 @@ import (
 
   "github.com/Sirupsen/logrus"
   "github.com/armon/consul-api"
+
+  "github.com/hivetech/envconsul/log"
 )
 
 // Configuration for watches.
@@ -145,9 +147,8 @@ func watchAndExec(config *WatchConfig) (int, error) {
       cmdEnv = append(cmdEnv, fmt.Sprintf("%s=%s", k, v))
     }
     cmd = exec.Command(config.Cmd[0], config.Cmd[1:]...)
-    // TODO Add a prefix like the process name ?
-    cmd.Stdout = NewLogstream(Log, "stdout", config.Cmd[0])
-    cmd.Stderr = NewLogstream(Log, "stderr", config.Cmd[0])
+    cmd.Stdout = log.NewLogstream(Log, "stdout", config.Cmd[0])
+    cmd.Stderr = log.NewLogstream(Log, "stderr", config.Cmd[0])
 
     Log.Info("Starting process ...")
     cmd.Env = cmdEnv
