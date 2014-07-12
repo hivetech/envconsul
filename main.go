@@ -24,10 +24,8 @@ func realMain() int {
   var consulDC string
   var sanitize bool
   var upcase bool
-  var logfile string
   var verbose bool
-  // Services available
-  var webService string
+  var linkServices string
   // Hooks available
   var loghookArg string
 
@@ -54,16 +52,12 @@ func realMain() int {
     &verbose, "verbose", false,
     "Extend log output to debug level")
   flag.StringVar(
-    &logfile, "logfile", "",
-    "If provided, redirect logs to this file")
-  // Services available
-  flag.StringVar(
-    &webService, "web", "",
-    "Comma separated web services on the network to discover")
+    &linkServices, "discover", "",
+    "Comma separated <service:tag> on the network to discover")
   // Hooks available
   flag.StringVar(
     &loghookArg, "loghook", "",
-    "A service where to send logs, like <service>:<info>")
+    "An app where to send logs [pushbullet]")
 
   flag.Parse()
   if flag.NArg() < 2 {
@@ -78,14 +72,31 @@ func realMain() int {
     Log.Level = logrus.Debug
   }
   Log.Formatter = new(logrus.TextFormatter)
-  loghook := strings.Split(loghookArg, ":")
-  if loghook[0] == "pushbullet" && len(loghook) == 2 {
-    Log.Hooks.Add(log.NewPushbulletHook(args[0], os.Getenv("PUSHBULLET_API_KEY"), loghook[1]))
-  } else {
-    Log.Warn("Loghook not implemented, skipping.")
-  }
-
-  if logfile != "" {
+  if loghookArg == "pushbullet" {
+    apiKey := os.Getenv("PUSHBULLET_API_KEY")
+    device := os.Getenv("PUSHBULLET_DEVICE")
+    if apiKey != "" && device != "" {
+      Log.WithFields(logrus.Fields{
+        "device": device,
+      }).Info("Registering pushbullet loghook.")
+      Log.Hooks.Add(log.NewPushbulletHook(args[1], device, apiKey))
+    } else {
+      Log.Warn("Missing pushbullet informations.")
+    }
+  } else if loghookArg == "hipchat" {
+    apiKey := os.Getenv("HIPCHAT_API_KEY")
+    roomId := os.Getenv("HIPCHAT_ROOM")
+    if apiKey != "" && roomId != "" {
+      Log.WithFields(logrus.Fields{
+        "room": roomId,
+      }).Info("Registering hipchat loghook.")
+      Log.Hooks.Add(log.NewHipchatHook(args[1], roomId, apiKey))
+    } else {
+      Log.Warn("Missing Hipchat informations.")
+    }
+  } else if loghookArg != "" {
+    logfile := loghookArg
+    Log.Info("Using File hook.")
     // open output file
     fd, err := os.Create(logfile)
     if err != nil {
@@ -108,23 +119,27 @@ func realMain() int {
       Log.Out = fd
     }
   }
+
   Log.WithFields(logrus.Fields{
     "verbose":   verbose,
     "formatter": "Text",
   }).Debug("Logger ready (obviously !)")
 
   var nodesNetwork = NewConsulNetwork(consulAddr, consulDC)
-  if webService != "" {
-    webServices := strings.Split(webService, ",")
-    for i := 0; i < len(webServices); i++ {
+  if linkServices != "" {
+    links := strings.Split(linkServices, ",")
+    for i := 0; i < len(links); i++ {
+      linkDetails := strings.Split(links[i], ":")
+      // TODO Handle missing tag
+      // TODO Optional tag or node name instead (a query dsl ?)
       Log.WithFields(logrus.Fields{
-        "type": "web",
-        "tag":  webServices[i],
+        "service": linkDetails[0],
+        "tag":     linkDetails[1],
       }).Info("Service required.")
-      if err := nodesNetwork.discoverAndRemember("web", webServices[i], args[0]); err != nil {
+      if err := nodesNetwork.discoverAndRemember(linkDetails[0], linkDetails[1], args[0]); err != nil {
         Log.WithFields(logrus.Fields{
-          "service": "web",
-          "tag":     webServices[i],
+          "service": linkDetails[0],
+          "tag":     linkDetails[1],
         }).Error(err.Error())
         // TODO Different strategies (stop, retry, ...)
         if errExit {

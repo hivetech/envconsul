@@ -37,13 +37,13 @@ func (c *ConsulNetwork) discoverAndRemember(serviceName, tag, prefix string) err
     }).Info("Identified service as healthy.")
 
     c.injectIntoEnv(
-      fmt.Sprintf("%s/%s_HOST", prefix, strings.ToUpper(tag)),
+      fmt.Sprintf("%s/%s_HOST", prefix, strings.ToUpper(serviceName)),
       service.Node.Address,
     )
 
     if service.Service.Port != 0 {
       c.injectIntoEnv(
-        fmt.Sprintf("%s/%s_PORT", prefix, strings.ToUpper(tag)),
+        fmt.Sprintf("%s/%s_PORT", prefix, strings.ToUpper(serviceName)),
         strconv.Itoa(service.Service.Port),
       )
     } else {

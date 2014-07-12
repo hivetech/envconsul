@@ -76,13 +76,25 @@ the online demo UI while envconsul was running.
 You can ask envconsul to automatically inject into process environment how to
 access a remote service, known by consul.
 
-Considering an application registered in the console network under `web`
-service with tag `dashboard` :
+Considering an application registered in the console network under `redis`
+service with a tag `cache` :
 
 ```
-$ ./envconsul --web dashboard app/env env
+$ ./envconsul --discover redis:cache app/env env
 ...
-INFO[0000] env DASHBOARD_HOST=172.17.0.4
-INFO[0000] env DASHBOARD_PORT=80
+INFO[0000] env REDIS_HOST=172.17.0.4
+INFO[0000] env REDIS_PORT=80
 INFO[0000] Done
 ```
+
+## Log hooks
+
+*envconsul* outputs logs on `stdout` and `stderr` but it also comes with
+built-in routines that ship them elsewhere :
+
+* File - `--loghook anything.log`
+* [Hipchat](http://hipchat.com/) - Use `--loghook hipchat` and export `HIPCHAT_API_KEY` and `HIPCHAT_ROOM`
+* [Pushbullet](http://pushbullet.com/) - Use `--loghook pushbullet` and export `PUSHBULLET_API_KEY` and `PUSHBULLET_DEVICE`
+
+Currently, hipchat and pushbullet catch only `panic`, `fatal` and `error`
+levels as configured in `log/hipchat.go` and `log/pushbullet.go`.

@@ -9,7 +9,7 @@ import (
 )
 
 // PushbulletHook to send exceptions to a connected device with the Pushbullet
-// API. You must set:
+// API. You must provide:
 // * pushbullet.Device
 // * pushbullet.ApiKey
 //
@@ -18,12 +18,11 @@ import (
 type PushbulletHook struct {
   Client  *pushbullet.Client
   Devices []*pushbullet.Device
-  ApiKey  string
   Device  string
   App     string
 }
 
-func NewPushbulletHook(app, apikey, device string) *PushbulletHook {
+func NewPushbulletHook(app, device, apikey string) *PushbulletHook {
   pb := pushbullet.New(apikey)
   // TODO What to do with the error ?
   // TODO Is it good practice to risk errors here ?
@@ -32,7 +31,6 @@ func NewPushbulletHook(app, apikey, device string) *PushbulletHook {
   return &PushbulletHook{
     Client:  pb,
     Devices: devs,
-    ApiKey:  apikey,
     Device:  device,
     App:     app,
   }
