@@ -1,86 +1,57 @@
-# envconsul
+# Iron-App
 
-envconsul sets environmental variables for processes by reading them
-from [Consul's K/V store](http://www.consul.io).
+iron-app extends [envconsul] with the
+following features, described details below.
 
-envconsul allows applications to be configured with environmental variables,
-without having to be knowledgable about the existence of Consul. This makes
-it especially easy to configure applications throughout all your
-environments: development, testing, production, etc.
-
-envconsul is inspired by [envdir](http://cr.yp.to/daemontools/envdir.html)
-in its simplicity, name, and function.
+* Service discovery
+* Process logs hooks
+* [TODO] Application performances storage
+* [TODO] Application metadata storage in consul
 
 ## Download & Usage
 
-Download a release from the
-[releases page](#).
-Run `envconsul` to see the usage help:
-
+```
+go get github.com/hivetech/iron-app
 ```
 
-$ envconsul
-Usage: envconsul [options] prefix child...
+Run `iron-app` to see the usage help:
 
-  Sets environmental variables for the child process by reading
-  K/V from Consul's K/V store with the given prefix.
+```
+$ iron-app
+Usage: iron-app [options] prefix child...
+
+  Exoskeleton for applications.
+
+  Load env from Consul's K/V store, discover provided services, route
+  application output and store performances and application metadata.
 
 Options:
 
   -addr="127.0.0.1:8500": consul HTTP API address with port
   -dc="": consul datacenter, uses local if blank
+  -discover="": Comma separated <service:tag> on the network to discover
   -errexit=false: exit if there is an error watching config keys
-  -logfile="": If provided, redirect logs to this file
+  -loghook="": An app where to send logs [pushbullet]
   -reload=false: if set, restarts the process when config changes
-  -sanitize=false: turn invalid characters in the key into underscores
-  -upcase=false: make all environmental variable keys uppercase
+  -sanitize=true: turn invalid characters in the key into underscores
+  -upcase=true: make all environmental variable keys uppercase
   -verbose=false: Extend log output to debug level
-  -web="": Comma separated web services on the network to discover
 ```
 
-## Example
+## Process env injection
 
-We run the example below against our
-[NYC demo server](http://nyc1.demo.consul.io). This lets you set
-keys/values in a public place to just quickly test envconsul. Note
-that the demo server will clear the k/v store every 30 minutes.
-
-After setting the `prefix/FOO` key to "bar" on the demo server,
-we can see it work:
-
-```
-$ envconsul -addr="nyc1.demo.consul.io:80" prefix env
-INFO[0000] env FOO=bar
-```
-
-We can also ask envconsul to watch for any configuration changes
-and restart our process:
-
-```
-$ envconsul -addr="nyc1.demo.consul.io:80" -reload \
-  prefix /bin/sh -c "env; echo "-----"; sleep 1000"
-INFO[0000] env FOO=bar
-INFO[0000] env -----
-INFO[0000] env FOO=baz
-INFO[0000] env -----
-INFO[0000] env FOO=baz
-INFO[0000] env BAR=FOO
-INFO[0000] env -----
-```
-
-The above output happened by setting keys and values within
-the online demo UI while envconsul was running.
+`iron-app` replicates the full possibilities of [envconsul][1].
 
 ## Service discovery
 
-You can ask envconsul to automatically inject into process environment how to
+You can ask iron-app to automatically inject into process environment how to
 access a remote service, known by consul.
 
 Considering an application registered in the console network under `redis`
 service with a tag `cache` :
 
 ```
-$ ./envconsul --discover redis:cache app/env env
+$ ./iron-app --discover redis:cache app/env env
 ...
 INFO[0000] env REDIS_HOST=172.17.0.4
 INFO[0000] env REDIS_PORT=80
@@ -89,12 +60,15 @@ INFO[0000] Done
 
 ## Log hooks
 
-*envconsul* outputs logs on `stdout` and `stderr` but it also comes with
+*iron-app* outputs logs on `stdout` and `stderr` but it also comes with
 built-in routines that ship them elsewhere :
 
 * File - `--loghook anything.log`
-* [Hipchat](http://hipchat.com/) - Use `--loghook hipchat` and export `HIPCHAT_API_KEY` and `HIPCHAT_ROOM`
-* [Pushbullet](http://pushbullet.com/) - Use `--loghook pushbullet` and export `PUSHBULLET_API_KEY` and `PUSHBULLET_DEVICE`
+* [Hipchat](http://hipchat.com/) - Export `HIPCHAT_API_KEY` and `HIPCHAT_ROOM` and use `--loghook hipchat`
+* [Pushbullet](http://pushbullet.com/) - Export `PUSHBULLET_API_KEY` and `PUSHBULLET_DEVICE` and use `--loghook pushbullet`
 
 Currently, hipchat and pushbullet catch only `panic`, `fatal` and `error`
 levels as configured in `log/hipchat.go` and `log/pushbullet.go`.
+
+
+[1]: https://github.com/hashicorp/envconsul

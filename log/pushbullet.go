@@ -73,8 +73,8 @@ func (hook *PushbulletHook) Push(entry *logrus.Entry, device *pushbullet.Device)
 
 func (hook *PushbulletHook) Levels() []logrus.Level {
   return []logrus.Level{
-    logrus.Error,
-    logrus.Fatal,
-    logrus.Panic,
+    logrus.ErrorLevel,
+    logrus.FatalLevel,
+    logrus.PanicLevel,
   }
 }

@@ -13,7 +13,7 @@ import (
   "github.com/Sirupsen/logrus"
   "github.com/armon/consul-api"
 
-  "github.com/hivetech/envconsul/log"
+  "github.com/hivetech/iron-app/log"
 )
 
 // Configuration for watches.

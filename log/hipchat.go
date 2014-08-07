@@ -60,8 +60,8 @@ func (hook *HipchatHook) Fire(entry *logrus.Entry) error {
 
 func (hook *HipchatHook) Levels() []logrus.Level {
   return []logrus.Level{
-    logrus.Error,
-    logrus.Fatal,
-    logrus.Panic,
+    logrus.ErrorLevel,
+    logrus.FatalLevel,
+    logrus.PanicLevel,
   }
 }

@@ -8,7 +8,7 @@ import (
 
   "github.com/Sirupsen/logrus"
 
-  "github.com/hivetech/envconsul/log"
+  "github.com/hivetech/iron-app/log"
 )
 
 var Log = logrus.New()
@@ -69,7 +69,7 @@ func realMain() int {
 
   // Initialize logger
   if verbose {
-    Log.Level = logrus.Debug
+    Log.Level = logrus.DebugLevel
   }
   Log.Formatter = new(logrus.TextFormatter)
   if loghookArg == "pushbullet" {
@@ -185,8 +185,10 @@ func usage() {
 const helpText = `
 Usage: %s [options] prefix child...
 
-  Sets environmental variables for the child process by reading
-  K/V from Consul's K/V store with the given prefix.
+  Exoskeleton for applications.
+
+  Load env from Consul's K/V store, discover provided services, route
+  application output and store performances and application metadata.
 
 Options:
 `

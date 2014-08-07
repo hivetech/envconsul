@@ -26,7 +26,7 @@ _testmain.go
 
 # Project
 .vendor/
-envconsul
+iron-app
 Goopfile
 *.log
 .env*
