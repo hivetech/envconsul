@@ -51,8 +51,6 @@ func NewIronWrapper(config *IronConfig) (*IronWrapper, error) {
 		return nil, err
 	}
 
-	// Setup monitoring
-
 	return &IronWrapper{
 		config:  config,
 		network: network,

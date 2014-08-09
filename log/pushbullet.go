@@ -30,7 +30,6 @@ func NewPushbulletHook(app string) (*PushbulletHook, error) {
 		return nil, fmt.Errorf("Missing informations to setup pushbullet loghook")
 	}
 	pb := pushbullet.New(apiKey)
-	// TODO What to do with the error ?
 	devs, err := pb.Devices()
 	if err != nil {
 		return nil, err

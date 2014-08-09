@@ -15,7 +15,7 @@ var (
 
 // Connects to Consul and watches a given K/V prefix and uses that to
 // execute a child process.
-func watchAndExec(command []string, config *IronConfig, services []string, reload, errExit bool) (int, error) {
+func watchAndExec(command []string, config *IronConfig, services []string, monitor, reload, errExit bool) (int, error) {
 	wrapper, _ := NewIronWrapper(config)
 
 	// Service discovery
@@ -53,8 +53,7 @@ func watchAndExec(command []string, config *IronConfig, services []string, reloa
 	for {
 		var pairs consulapi.KVPairs
 
-		// Wait for new pairs to come on our channel or an error
-		// to occur.
+		// Wait for new pairs to come on our channel or an error to occur.
 		select {
 		case exit := <-exitCh:
 			return exit, nil
@@ -88,7 +87,9 @@ func watchAndExec(command []string, config *IronConfig, services []string, reloa
 		exitCh = make(chan int, 1)
 		wrapper.Fork(command, cmdEnv, exitCh)
 		// Acquire process metrics and store it in influx db
-		go wrapper.watchMetrics(quitCh)
+		if monitor {
+			go wrapper.watchMetrics(quitCh)
+		}
 	}
 
 	return 0, nil

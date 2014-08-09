@@ -1,8 +1,9 @@
 package log
 
 import (
-	"github.com/Sirupsen/logrus"
 	"os"
+
+	"github.com/Sirupsen/logrus"
 )
 
 type IronLogger struct {
@@ -28,13 +29,15 @@ func (self *IronLogger) SetupHook(loghook string) error {
 		if pbHook, err := NewPushbulletHook(self.namespace); err != nil {
 			return err
 		} else {
-			self.Hooks.Add(pbHook)
+			//self.Hooks.Add(pbHook)
+			logrus.AddHook(pbHook)
 		}
 	case "hipchat":
-		if hipchatHook, err := NewPushbulletHook(self.namespace); err != nil {
+		if hipchatHook, err := NewHipchatHook(self.namespace); err != nil {
 			return err
 		} else {
-			self.Hooks.Add(hipchatHook)
+			//self.Hooks.Add(hipchatHook)
+			logrus.AddHook(hipchatHook)
 		}
 	default:
 		if loghook != "" {
@@ -42,8 +45,8 @@ func (self *IronLogger) SetupHook(loghook string) error {
 			if fd, err := os.Create(loghook); err != nil {
 				return err
 			} else {
-				//self.Out = fd
-				logrus.SetOutput(fd)
+				self.Out = fd
+				//logrus.SetOutput(fd)
 			}
 			// TODO Close this goddamn fd
 		}
