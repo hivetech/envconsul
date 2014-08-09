@@ -1,12 +1,12 @@
 # Iron-App
 
-iron-app extends [envconsul] with the
+`iron-app` extends [envconsul][1] with the
 following features, described details below.
 
-* Service discovery
-* Process logs hooks
-* [TODO] Application performances storage
-* [TODO] Application metadata storage in consul
+* Service discovery, following [Twelve-Factors app][3]
+* App logs hooks
+* App performances storage
+* App metadata storage in consul
 
 ## Download & Usage
 
@@ -58,9 +58,13 @@ INFO[0000] env REDIS_PORT=80
 INFO[0000] Done
 ```
 
+## Performances monitoring
+
+TODO
+
 ## Log hooks
 
-*iron-app* outputs logs on `stdout` and `stderr` but it also comes with
+`iron-app` outputs logs on `stdout` and `stderr` but it also comes with
 built-in routines that ship them elsewhere :
 
 * File - `--loghook anything.log`
@@ -72,3 +76,4 @@ levels as configured in `log/hipchat.go` and `log/pushbullet.go`.
 
 
 [1]: https://github.com/hashicorp/envconsul
+[3]: http://12factor.net/
