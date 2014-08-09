@@ -13,9 +13,14 @@ type InfluxDB struct {
 }
 
 func NewInfluxDB(dbName, user, password string) (*InfluxDB, error) {
-	// TODO Default values
 	influxHost := os.Getenv("INFLUXDB_HOST")
 	influxPort := os.Getenv("INFLUXDB_PORT")
+	if influxHost == "" {
+		influxHost = "localhost"
+	}
+	if influxPort == "" {
+		influxHost = "8086"
+	}
 	client, _ := influxClient.NewClient(&influxClient.ClientConfig{
 		Host:     fmt.Sprintf("%s:%s", influxHost, influxPort),
 		Database: dbName,

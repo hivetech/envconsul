@@ -11,7 +11,7 @@ import (
 	"github.com/hivetech/iron-app/log"
 )
 
-var Log = logrus.New()
+var Log *log.IronLogger
 
 func main() {
 	os.Exit(realMain())
@@ -67,103 +67,28 @@ func realMain() int {
 
 	args := flag.Args()
 
-	// Initialize logger
-	if verbose {
-		Log.Level = logrus.DebugLevel
+	Log = log.NewIronLogger(args[1], verbose)
+	if err := Log.SetupHook(loghookArg); err != nil {
+		Log.Error(err)
 	}
-	Log.Formatter = new(logrus.TextFormatter)
-	if loghookArg == "pushbullet" {
-		apiKey := os.Getenv("PUSHBULLET_API_KEY")
-		device := os.Getenv("PUSHBULLET_DEVICE")
-		if apiKey != "" && device != "" {
-			Log.WithFields(logrus.Fields{
-				"device": device,
-			}).Info("Registering pushbullet loghook.")
-			Log.Hooks.Add(log.NewPushbulletHook(args[1], device, apiKey))
-		} else {
-			Log.Warn("Missing pushbullet informations.")
-		}
-	} else if loghookArg == "hipchat" {
-		apiKey := os.Getenv("HIPCHAT_API_KEY")
-		roomId := os.Getenv("HIPCHAT_ROOM")
-		if apiKey != "" && roomId != "" {
-			Log.WithFields(logrus.Fields{
-				"room": roomId,
-			}).Info("Registering hipchat loghook.")
-			Log.Hooks.Add(log.NewHipchatHook(args[1], roomId, apiKey))
-		} else {
-			Log.Warn("Missing Hipchat informations.")
-		}
-	} else if loghookArg != "" {
-		logfile := loghookArg
-		Log.Info("Using File hook.")
-		// open output file
-		fd, err := os.Create(logfile)
-		if err != nil {
-			Log.WithFields(logrus.Fields{
-				"error": err.Error(),
-				"file":  logfile,
-			}).Error("Unable to create file.")
-		}
-		// close fo on exit and check for its returned error
-		defer func() {
-			if err := fd.Close(); err != nil {
-				Log.WithFields(logrus.Fields{
-					"error": err.Error(),
-					"file":  logfile,
-				}).Error("Unable to close file descriptor.")
-				panic(err)
-			}
-		}()
-		if err == nil {
-			Log.Out = fd
-		}
-	}
-
 	Log.WithFields(logrus.Fields{
 		"verbose":   verbose,
+		"namespace": args[1],
 		"formatter": "Text",
 	}).Debug("Logger ready (obviously !)")
 
-	var nodesNetwork = NewConsulNetwork(consulAddr, consulDC)
-	if linkServices != "" {
-		links := strings.Split(linkServices, ",")
-		for i := 0; i < len(links); i++ {
-			linkDetails := strings.Split(links[i], ":")
-			// TODO Handle missing tag
-			// TODO Optional tag or node name instead (a query dsl ?)
-			Log.WithFields(logrus.Fields{
-				"service": linkDetails[0],
-				"tag":     linkDetails[1],
-			}).Info("Service required.")
-			if err := nodesNetwork.discoverAndRemember(linkDetails[0], linkDetails[1], args[0]); err != nil {
-				Log.WithFields(logrus.Fields{
-					"service": linkDetails[0],
-					"tag":     linkDetails[1],
-				}).Error(err.Error())
-				// TODO Different strategies (stop, retry, ...)
-				if errExit {
-					Log.WithFields(logrus.Fields{
-						"reason":  err.Error(),
-						"errExit": errExit,
-					}).Warn("Forcing exit ...")
-					os.Exit(1)
-				}
-			}
-		}
+	services := strings.Split(linkServices, ",")
+	config := IronConfig{
+		Namespace:    "iron-app",
+		App:          args[0],
+		ConsulAddr:   consulAddr,
+		ConsulDC:     consulDC,
+		Sanitize:     sanitize,
+		Upcase:       upcase,
+		PollInterval: 5,
 	}
+	result, err := watchAndExec(args[1:], &config, services, reload, errExit)
 
-	config := WatchConfig{
-		ConsulAddr: consulAddr,
-		ConsulDC:   consulDC,
-		Cmd:        args[1:],
-		ErrExit:    errExit,
-		Prefix:     args[0],
-		Reload:     reload,
-		Sanitize:   sanitize,
-		Upcase:     upcase,
-	}
-	result, err := watchAndExec(&config)
 	Log.WithFields(logrus.Fields{
 		"result": result,
 		"error":  err,
