@@ -5,3 +5,4 @@ github.com/andybons/hipchat #08bf65eade11bf8d584e933d01a35c2799c36ff4
 github.com/shirou/gopsutil #594816dd1f95ca4673bf467384a54e2116c76bf8
 github.com/influxdb/influxdb/client #63cc69f1dfb12f35ad8a3e4fb4b1115d3a1edc91
 github.com/codegangsta/cli #aa19913be3107ab75ea67a5a88d667d62a69dbbd
+github.com/mitchellh/gox #c7329055e2aeb253a947e5cc876586ff4ca19199

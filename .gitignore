@@ -30,3 +30,5 @@ iron-app
 Goopfile
 *.log
 .env*
+bin/
+pkg/

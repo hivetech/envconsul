@@ -1,8 +1,6 @@
 package main
 
 import (
-	"os"
-
 	"github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
 
@@ -67,5 +65,5 @@ func main() {
 		}
 	}
 
-	app.Run(os.Args)
+	app.RunAndExitOnError()
 }

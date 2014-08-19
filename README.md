@@ -1,5 +1,7 @@
 # Iron-App
 
+> Exoskeleton for applications
+
 `iron-app` extends [envconsul][1] with the
 following features, described details below.
 
@@ -9,6 +11,16 @@ following features, described details below.
 * App metadata storage in consul
 
 ## Download & Usage
+
+Download the single binary (for now, only on linux 64bits)
+
+```
+PACKAGE=iron-app_0.1.1_linux_amd64.zip
+wget https://dl.bintray.com/hackliff/hivetech/$PACKAGE
+unzip $PACKAGE && sudo mv ironapp /usr/local/bin/iron-app
+```
+
+Or compile from source
 
 ```
 go get github.com/hivetech/iron-app
